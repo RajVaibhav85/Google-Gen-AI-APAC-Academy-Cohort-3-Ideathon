@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { AuthContext } from './AuthContextObject';
 import {
   auth,
   googleProvider,
@@ -14,11 +15,7 @@ import {
   sendPasswordResetEmail
 } from 'firebase/auth';
 
-const AuthContext = createContext();
-
-export function useAuth() {
-  return useContext(AuthContext);
-}
+export { useAuth } from './useAuth';
 
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
@@ -49,14 +46,12 @@ export function AuthProvider({ children }) {
       setLoading(false);
     });
 
-    return unsubscribe;
+    return () => unsubscribe();
   }, []);
 
-  // Sign up with Email and Password
   async function signUpWithEmail(email, password, displayName) {
     setError(null);
-    if (!auth) throw new Error('Firebase is not configured yet. Please enter your project keys.');
-    
+    if (!auth) throw new Error('Firebase is not configured yet.');
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     if (displayName) {
       await updateProfile(userCredential.user, { displayName });
@@ -67,11 +62,9 @@ export function AuthProvider({ children }) {
     return userCredential.user;
   }
 
-  // Sign in with Email and Password
   async function signInWithEmail(email, password) {
     setError(null);
-    if (!auth) throw new Error('Firebase is not configured yet. Please enter your project keys.');
-    
+    if (!auth) throw new Error('Firebase is not configured yet.');
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const idToken = await userCredential.user.getIdToken();
     setToken(idToken);
@@ -79,11 +72,9 @@ export function AuthProvider({ children }) {
     return userCredential.user;
   }
 
-  // Sign in with Google Popup
   async function signInWithGoogle() {
     setError(null);
-    if (!auth) throw new Error('Firebase is not configured yet. Please enter your project keys.');
-    
+    if (!auth) throw new Error('Firebase is not configured yet.');
     const userCredential = await signInWithPopup(auth, googleProvider);
     const idToken = await userCredential.user.getIdToken();
     setToken(idToken);
@@ -91,7 +82,6 @@ export function AuthProvider({ children }) {
     return userCredential.user;
   }
 
-  // Sign out
   async function logout() {
     setError(null);
     if (auth) {
@@ -101,7 +91,6 @@ export function AuthProvider({ children }) {
     setToken(null);
   }
 
-  // Password reset email
   async function resetPassword(email) {
     setError(null);
     if (!auth) throw new Error('Firebase is not configured yet.');
