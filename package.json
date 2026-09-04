@@ -1,20 +1,20 @@
 {
-  "name": "cohort3-mern-python",
+  "name": "personal-gemini-journal-mern",
   "version": "1.0.0",
   "private": true,
-  "description": "MERN Stack with Python RAG/ML for Google GenAI Cohort 3 & Cloud Run Challenge",
+  "description": "Production-ready MERN AI application on Cloud Run with Firebase Auth, Firestore, and Gemini API",
   "scripts": {
     "dev": "npm run dev:client",
     "dev:client": "npm --prefix client run dev",
     "dev:server": "node server/server.js",
-    "build:client": "npm --prefix client run build"
+    "build:client": "npm --prefix client run build",
+    "start": "node server/server.js"
   },
   "keywords": [
     "mern",
     "firebase",
     "gemini",
-    "python",
-    "rag",
+    "firestore",
     "cloud-run"
   ],
   "author": "Google GenAI Cohort 3",

@@ -1,18 +1,22 @@
 {
   "name": "mern-server",
   "version": "1.0.0",
-  "description": "Express backend with Firebase Admin SDK and MongoDB/Firestore integration",
+  "description": "Express backend with Gemini API Multi-turn, Firebase Admin SDK, and Cloud Firestore",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js"
   },
   "dependencies": {
+    "@google/genai": "^2.21.0",
+    "@google-cloud/firestore": "^7.11.0",
+    "@google-cloud/secret-manager": "^5.6.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "firebase-admin": "^13.1.0",
     "helmet": "^8.0.0",
-    "mongoose": "^8.9.5"
+    "mongoose": "^8.9.5",
+    "zod": "^3.24.2"
   }
 }
