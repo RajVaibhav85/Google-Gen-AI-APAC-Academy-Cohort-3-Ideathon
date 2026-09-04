@@ -43,7 +43,10 @@ export function AuthProvider({ children }) {
         setCurrentUser(null);
         setToken(null);
       }
-      setLoading(false);
+      // Ensure smooth, visible loading presentation on refresh
+      setTimeout(() => {
+        setLoading(false);
+      }, 650);
     });
 
     return () => unsubscribe();

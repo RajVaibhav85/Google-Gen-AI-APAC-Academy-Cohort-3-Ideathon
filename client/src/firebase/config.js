@@ -1,5 +1,7 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+import { getDatabase } from 'firebase/database';
 import { getAnalytics, isSupported } from 'firebase/analytics';
 
 export const firebaseConfig = {
@@ -9,12 +11,15 @@ export const firebaseConfig = {
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "cohort3-29812.firebasestorage.app",
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "574414820901",
   appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:574414820901:web:99150481a8ca31f6bf51cc",
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-JZ1TP9CYGJ"
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-JZ1TP9CYGJ",
+  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL || "https://cohort3-29812-default-rtdb.firebaseio.com"
 };
 
 // Initialize Firebase App
 const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app);
+const rtdb = getDatabase(app);
 const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({ prompt: 'select_account' });
 
@@ -35,4 +40,4 @@ export function saveFirebaseConfig(newConfig) {
   window.location.reload();
 }
 
-export { app, auth, googleProvider, analytics };
+export { app, auth, db, rtdb, googleProvider, analytics };
