@@ -9,7 +9,17 @@
     "dev:server": "node server/server.js",
     "build:client": "npm --prefix client run build"
   },
-  "keywords": ["mern", "firebase", "gemini", "python", "rag", "cloud-run"],
+  "keywords": [
+    "mern",
+    "firebase",
+    "gemini",
+    "python",
+    "rag",
+    "cloud-run"
+  ],
   "author": "Google GenAI Cohort 3",
-  "license": "Apache-2.0"
+  "license": "Apache-2.0",
+  "dependencies": {
+    "firebase": "^12.18.0"
+  }
 }
