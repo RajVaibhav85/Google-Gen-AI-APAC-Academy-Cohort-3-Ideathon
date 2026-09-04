@@ -1,0 +1,15 @@
+{
+  "name": "cohort3-mern-python",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MERN Stack with Python RAG/ML for Google GenAI Cohort 3 & Cloud Run Challenge",
+  "scripts": {
+    "dev": "npm run dev:client",
+    "dev:client": "npm --prefix client run dev",
+    "dev:server": "node server/server.js",
+    "build:client": "npm --prefix client run build"
+  },
+  "keywords": ["mern", "firebase", "gemini", "python", "rag", "cloud-run"],
+  "author": "Google GenAI Cohort 3",
+  "license": "Apache-2.0"
+}
