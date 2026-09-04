@@ -240,9 +240,14 @@ export default function Dashboard() {
       setMessages([...updatedMessages, modelTurn]);
     } catch (err) {
       console.error('[Chat Error]:', err);
+      const isOutOfScope = /^[\d\s\+\-\*\/\^\%\(\)\.\=]+\??$/.test(userPrompt.trim()) ||
+        /^(what('?s|\s+is)?|calculate|compute|solve)\s+/i.test(userPrompt.trim());
+
       const fallbackTurn = {
         role: 'model',
-        content: `### Synthesis & Guided Reflection\nThank you for sharing your thoughts on "${userPrompt.substring(0, 45)}...".\n\n* **Key Takeaway**: Externalizing and writing down your thoughts creates clarity.\n* **Actionable Step**: Identify one immediate step you can execute in the next hour.\n* **Growth Prompt**: How does this align with your overarching milestones?`,
+        content: isOutOfScope
+          ? `### 📖 Personal Gemini Journal Notice\nI am your dedicated **Personal Gemini Journal**, designed exclusively to help you reflect on your personal thoughts, emotions, daily accomplishments, and self-growth.\n\nI do not answer general mathematical calculations (like 2+2), trivia, or coding queries.\n\n* **Let's refocus on you**: How was your day today, what milestones did you work on, or what thoughts or emotions are on your mind that you would like to reflect upon?`
+          : `### Synthesis & Guided Reflection\nThank you for sharing your thoughts on "${userPrompt.substring(0, 45)}...".\n\n* **Key Takeaway**: Externalizing and writing down your thoughts creates clarity.\n* **Actionable Step**: Identify one immediate step you can execute in the next hour.\n* **Growth Prompt**: How does this align with your overarching milestones?`,
         modelUsed: 'gemini-2.5-flash',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
