@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import GoogleSignInButton from './GoogleSignInButton';
 import FirebaseConfigModal from './FirebaseConfigModal';
 
 export default function AuthCard() {
@@ -9,6 +8,7 @@ export default function AuthCard() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState('');
   const [infoMessage, setInfoMessage] = useState('');
@@ -17,7 +17,6 @@ export default function AuthCard() {
   const {
     signInWithEmail,
     signUpWithEmail,
-    signInWithGoogle,
     resetPassword,
     isConfigured
   } = useAuth();
@@ -32,13 +31,18 @@ export default function AuthCard() {
       return;
     }
 
+    if (!email.trim() || !password) {
+      setFormError('Please enter both your email address and password.');
+      return;
+    }
+
     if (mode === 'signup') {
       if (password !== confirmPassword) {
         setFormError('Passwords do not match.');
         return;
       }
       if (password.length < 6) {
-        setFormError('Password must be at least 6 characters.');
+        setFormError('Password must be at least 6 characters long.');
         return;
       }
     }
@@ -46,32 +50,13 @@ export default function AuthCard() {
     setLoading(true);
     try {
       if (mode === 'signup') {
-        await signUpWithEmail(email, password, displayName);
+        await signUpWithEmail(email.trim(), password, displayName.trim());
+        setInfoMessage('Account created successfully! Logging you in...');
       } else {
-        await signInWithEmail(email, password);
+        await signInWithEmail(email.trim(), password);
       }
     } catch (err) {
-      console.error('Auth submission error:', err);
-      handleFirebaseError(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleGoogleSignIn = async () => {
-    setFormError('');
-    setInfoMessage('');
-
-    if (!isConfigured) {
-      setIsConfigModalOpen(true);
-      return;
-    }
-
-    setLoading(true);
-    try {
-      await signInWithGoogle();
-    } catch (err) {
-      console.error('Google sign-in error:', err);
+      console.error('Email auth error:', err);
       handleFirebaseError(err);
     } finally {
       setLoading(false);
@@ -79,14 +64,14 @@ export default function AuthCard() {
   };
 
   const handleForgotPassword = async () => {
-    if (!email) {
+    if (!email.trim()) {
       setFormError('Please enter your email address to receive a password reset link.');
       return;
     }
     setLoading(true);
     try {
-      await resetPassword(email);
-      setInfoMessage(`Password reset link sent to ${email}. Check your inbox!`);
+      await resetPassword(email.trim());
+      setInfoMessage(`Password reset link sent to ${email.trim()}. Please check your inbox!`);
     } catch (err) {
       handleFirebaseError(err);
     } finally {
@@ -97,46 +82,26 @@ export default function AuthCard() {
   function handleFirebaseError(err) {
     const code = err.code || '';
     if (code === 'auth/invalid-email') {
-      setFormError('Invalid email address format.');
+      setFormError('Please provide a valid email address.');
     } else if (code === 'auth/user-not-found' || code === 'auth/invalid-credential') {
-      setFormError('Incorrect email or password.');
+      setFormError('Invalid email or password. Please verify your credentials.');
     } else if (code === 'auth/wrong-password') {
-      setFormError('Incorrect password.');
+      setFormError('Incorrect password. Try again or click "Forgot password?".');
     } else if (code === 'auth/email-already-in-use') {
-      setFormError('An account with this email already exists.');
+      setFormError('An account with this email address already exists. Please sign in instead.');
     } else if (code === 'auth/weak-password') {
       setFormError('Password is too weak. Please use at least 6 characters.');
-    } else if (code === 'auth/popup-closed-by-user') {
-      setFormError('Google sign-in window was closed before completion.');
-    } else if (code === 'auth/configuration-not-found' || code === 'auth/operation-not-allowed') {
-      setFormError('Google Sign-In or Email Auth is not enabled in your Firebase Console. Go to Firebase Console &rarr; Authentication &rarr; Sign-in method &rarr; Enable Google & Email/Password.');
+    } else if (code === 'auth/too-many-requests') {
+      setFormError('Access temporarily disabled due to many failed login attempts. Please reset your password or try again later.');
+    } else if (code === 'auth/operation-not-allowed') {
+      setFormError('Email/Password sign-in is not enabled in your Firebase Console. Go to Authentication &rarr; Sign-in method &rarr; Enable Email/Password.');
     } else {
-      setFormError(err.message || 'Authentication failed. Please try again.');
+      setFormError(err.message || 'Authentication error. Please try again.');
     }
   }
 
   return (
     <div className="auth-card glass-panel">
-      {/* Configuration Status Banner */}
-      {!isConfigured && (
-        <div className="setup-banner">
-          <div className="setup-banner-content">
-            <span className="setup-icon">⚙️</span>
-            <div>
-              <strong>Firebase Project Not Yet Connected</strong>
-              <p>Click below to paste your Firebase credentials from your console.</p>
-            </div>
-          </div>
-          <button
-            type="button"
-            className="btn-setup"
-            onClick={() => setIsConfigModalOpen(true)}
-          >
-            Connect Project
-          </button>
-        </div>
-      )}
-
       {/* Brand & Heading */}
       <div className="auth-header">
         <div className="brand-badge-circle">
@@ -145,12 +110,12 @@ export default function AuthCard() {
           </svg>
         </div>
         <h2 className="auth-title">
-          {mode === 'signin' ? 'Welcome Back' : 'Create Your Account'}
+          {mode === 'signin' ? 'Sign In to Workspace' : 'Create an Account'}
         </h2>
         <p className="auth-subtitle">
           {mode === 'signin'
-            ? 'Sign in to access your personal Gemini workspace and private vault'
-            : 'Join to start reflective AI journaling with user-isolated persistence'}
+            ? 'Access your private AI journaling and reflection vault'
+            : 'Get started with secure, user-isolated AI journaling'}
         </p>
       </div>
 
@@ -186,21 +151,6 @@ export default function AuthCard() {
           <span>{infoMessage}</span>
         </div>
       )}
-
-      {/* One-Click Federated Google Sign-In */}
-      <div className="social-auth-section">
-        <GoogleSignInButton
-          onClick={handleGoogleSignIn}
-          loading={loading}
-          text={mode === 'signin' ? 'Sign in with Google' : 'Sign up with Google'}
-        />
-      </div>
-
-      <div className="divider">
-        <span className="divider-line"></span>
-        <span className="divider-text">OR CONTINUE WITH EMAIL</span>
-        <span className="divider-line"></span>
-      </div>
 
       {/* Email / Password Form */}
       <form onSubmit={handleAuthSubmit} className="auth-form" noValidate>
@@ -246,16 +196,26 @@ export default function AuthCard() {
               </button>
             )}
           </div>
-          <input
-            id="auth-password"
-            type="password"
-            className="text-input"
-            placeholder={mode === 'signup' ? 'At least 6 characters' : '••••••••'}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
-          />
+          <div className="password-input-wrapper">
+            <input
+              id="auth-password"
+              type={showPassword ? "text" : "password"}
+              className="text-input"
+              placeholder={mode === 'signup' ? 'At least 6 characters' : '••••••••'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+            />
+            <button
+              type="button"
+              className="password-toggle-btn"
+              onClick={() => setShowPassword(!showPassword)}
+              aria-label="Toggle password visibility"
+            >
+              {showPassword ? "🙈 Hide" : "👁️ Show"}
+            </button>
+          </div>
         </div>
 
         {mode === 'signup' && (
@@ -263,7 +223,7 @@ export default function AuthCard() {
             <label className="input-label" htmlFor="auth-confirm-password">Confirm Password</label>
             <input
               id="auth-confirm-password"
-              type="password"
+              type={showPassword ? "text" : "password"}
               className="text-input"
               placeholder="Re-enter your password"
               value={confirmPassword}
@@ -282,7 +242,7 @@ export default function AuthCard() {
           {loading ? (
             <span className="btn-spinner"></span>
           ) : (
-            <span>{mode === 'signin' ? 'Sign In' : 'Create Account'}</span>
+            <span>{mode === 'signin' ? 'Sign In with Email' : 'Create Account'}</span>
           )}
         </button>
       </form>

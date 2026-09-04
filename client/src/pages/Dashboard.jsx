@@ -57,13 +57,13 @@ export default function Dashboard() {
               Welcome, {currentUser?.displayName || 'Developer'}! 👋
             </h2>
             <p className="welcome-desc">
-              Your Firebase Authentication is active and secured via Google federated identity.
+              Your Firebase Authentication is active via secure Email and Password.
             </p>
           </div>
 
           <div className="provider-chip">
             <span className="provider-dot"></span>
-            <span>Provider: {providerId === 'google.com' ? 'Google Sign-In' : 'Email/Password'}</span>
+            <span>Provider: Firebase Email/Password</span>
           </div>
         </div>
 
