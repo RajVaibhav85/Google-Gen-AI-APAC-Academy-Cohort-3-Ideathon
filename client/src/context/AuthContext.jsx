@@ -8,6 +8,7 @@ import {
 import {
   onAuthStateChanged,
   signInWithPopup,
+  signInWithRedirect,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   updateProfile,
@@ -78,11 +79,23 @@ export function AuthProvider({ children }) {
   async function signInWithGoogle() {
     setError(null);
     if (!auth) throw new Error('Firebase is not configured yet.');
-    const userCredential = await signInWithPopup(auth, googleProvider);
-    const idToken = await userCredential.user.getIdToken();
-    setToken(idToken);
-    setCurrentUser(userCredential.user);
-    return userCredential.user;
+    try {
+      const userCredential = await signInWithPopup(auth, googleProvider);
+      const idToken = await userCredential.user.getIdToken();
+      setToken(idToken);
+      setCurrentUser(userCredential.user);
+      return userCredential.user;
+    } catch (popupErr) {
+      if (
+        popupErr.code === 'auth/popup-blocked' ||
+        popupErr.code === 'auth/popup-closed-by-user' ||
+        popupErr.code === 'auth/cancelled-popup-request'
+      ) {
+        console.log('[Auth] Popup interrupted, using redirect fallback...');
+        return await signInWithRedirect(auth, googleProvider);
+      }
+      throw popupErr;
+    }
   }
 
   async function logout() {

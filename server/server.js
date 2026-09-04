@@ -26,6 +26,7 @@ try {
 app.use(helmet({
   contentSecurityPolicy: false,
   crossOriginEmbedderPolicy: false,
+  crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
   crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 app.use(cors({ origin: true, credentials: true }));
